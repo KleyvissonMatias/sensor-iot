@@ -21,8 +21,8 @@ float TempCelsius = 0.0;     // variable output
 float TempFahrenheit = 0.0;  // variable output
 
 
-const char* ssid = "MATIAS NEW LINK 2G 997554761"; /*  Network's name  */
-const char* password = "12345678@@@#$";            /*  Network's password  */
+const char* ssid = "SSID"; /*  Network's name  */
+const char* password = "PASSWORD";            /*  Network's password  */
 
 const char* topic = "mosquitto_sensor_topic";    /*  MQTT Broker topic */
 const char* server = "ec2-18-220-182-251.us-east-2.compute.amazonaws.com"; /*  MQTT broker host */
