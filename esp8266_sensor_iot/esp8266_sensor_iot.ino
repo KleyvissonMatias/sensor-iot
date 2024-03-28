@@ -24,10 +24,12 @@ float TempFahrenheit = 0.0;  // variable output
 const char* ssid = "SSID"; /*  Network's name  */
 const char* password = "PASSWORD";            /*  Network's password  */
 
-const char* topic = "mosquitto_sensor_topic";    /*  MQTT Broker topic */
-const char* server = "SERVER_DNS"; /*  MQTT broker host */
-const int timezone = -3;       /*  Timezone (Brazil)   */
-String clientName = "ESP8266"; /*  Publisher device identifier  */
+const char* topic = "TOPIC";                              /*  MQTT Broker topic */
+const char* server = "HOST"; /*  MQTT broker host */
+const char mqtt_user[] = "USER";                                  /*  MQTT broker username   */
+const char mqtt_password[] = "PASSWORD";                          /*  MQTT broker user password  */
+const int timezone = -3;                                                   /*  Timezone (Brazil)   */
+String clientName = "ESP8266";                                             /*  Publisher device identifier  */
 
 /*  Structure to store DHT sensor data  */
 struct Metrics {
@@ -106,7 +108,7 @@ void loop() {
 
   Serial.println();
 
-  delay(3000);
+  delay(5000);
 }
 
 
@@ -148,14 +150,14 @@ void connectMQTT() {
     Serial.print(server);
     Serial.print(" as ");
     Serial.println(clientName);
-    if (client.connect((char*)clientName.c_str())) {
+    if (client.connect((char*)clientName.c_str(), mqtt_user, mqtt_password)) {
       Serial.println("Connected to MQTT broker");
       Serial.print("Topic is: ");
       Serial.println(topic);
     } else {
       Serial.println("MQTT connect failed");
       Serial.println("Will reset and try again...");
-      delay(500);
+      delay(1000);
     }
   }
   Serial.println("");
@@ -231,19 +233,16 @@ void wifiConnect() {
 String buildDateTime(time_t now) {
   struct tm* timeinfo;
   timeinfo = localtime(&now);
-  String c_year = (String)(timeinfo->tm_year + 1900);
-  String c_month = (String)(timeinfo->tm_mon + 1);
-  String c_day = (String)(timeinfo->tm_mday);
-  String c_hour = (String)(timeinfo->tm_hour);
-  String c_min = (String)(timeinfo->tm_min);
-  String c_sec = (String)(timeinfo->tm_sec);
+
+  String c_year = String(timeinfo->tm_year + 1900);
+  String c_month = (timeinfo->tm_mon + 1) < 10 ? "0" + String(timeinfo->tm_mon + 1) : String(timeinfo->tm_mon + 1);
+  String c_day = timeinfo->tm_mday < 10 ? "0" + String(timeinfo->tm_mday) : String(timeinfo->tm_mday);
+  String c_hour = timeinfo->tm_hour < 10 ? "0" + String(timeinfo->tm_hour) : String(timeinfo->tm_hour);
+  String c_min = timeinfo->tm_min < 10 ? "0" + String(timeinfo->tm_min) : String(timeinfo->tm_min);
+  String c_sec = timeinfo->tm_sec < 10 ? "0" + String(timeinfo->tm_sec) : String(timeinfo->tm_sec);
+
   String datetime = c_year + "-" + c_month + "-" + c_day + "T" + c_hour + ":" + c_min + ":" + c_sec;
 
-  if (timezone < 0) {
-    datetime += "-0" + (String)(timezone * -100);
-  } else {
-    datetime += "0" + (String)(timezone * 100);
-  }
   return datetime;
 }
 
@@ -303,7 +302,7 @@ String createPayload(String datetime, time_t now, Metrics* metric) {
   payload += "\"" + clientName + "\"";
   payload += ",\"microsegundos\":";
   payload += "\"" + (String)micros() + "\"";
-  payload += ",\"data\":";
+  payload += ",\"dataAtual\":";
   payload += "\"" + datetime + "\"";
   payload += ",\"timestamp\":";
   payload += "\"" + (String)now + "\"";
@@ -341,6 +340,7 @@ void publishMQTT(String payload) {
   Serial.println(payload);
   if (client.publish(topic, (char*)payload.c_str())) {
     Serial.println("Publish ok");
+    delay(3000);
   } else {
     Serial.println("Publish failed");
   }
