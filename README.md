@@ -31,7 +31,7 @@ Este é um projeto de sensor IoT que mede a temperatura em tempo real utilizando
 
 ## Uso
 
-O sensor começará a ler a temperatura automaticamente após a inicialização. As leituras serão publicadas no tópico MQTT especificado no servidor ECS da AWS.
+O sensor começará a ler a temperatura automaticamente após a inicialização. As leituras serão publicadas no tópico MQTT especificado no servidor GCE da Google Cloud Platform.
 
 ## Arquitetura AWS ECS
 
